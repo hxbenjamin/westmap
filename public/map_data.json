@@ -1,0 +1,19 @@
+{
+  "metadata": {
+    "mapWidth": 4725,
+    "mapHeight": 3333,
+    "originHex": [24, 11]
+  },
+  "features": [
+    {
+      "type": "town",
+      "label": "Shipfall",
+      "loc": [0, 0]
+    },
+    {
+      "type": "town",
+      "label": "Rhubarb",
+      "loc": [12, -7]
+    }
+  ]
+}

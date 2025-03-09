@@ -16,3 +16,11 @@
 #map {
   height: 95vh;
 }
+
+.wm-position-control {
+  color: black;
+}
+
+.wm-position-control > span {
+  padding: 4px;
+}
