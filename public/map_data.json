@@ -2,7 +2,9 @@
   "metadata": {
     "mapWidth": 4725,
     "mapHeight": 3333,
-    "originHex": [24, 11]
+    "originHex": [24, 11],
+    "hexRadius": 50,
+    "originOffset": [0, -2]
   },
   "features": [
     {

@@ -13,9 +13,11 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-#map {
+#westmap-map {
   height: 95vh;
+  background-color: black;
 }
+
 
 .wm-position-control {
   color: black;
