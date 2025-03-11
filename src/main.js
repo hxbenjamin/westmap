@@ -5,6 +5,8 @@ import 'leaflet/dist/images/marker-icon-2x.png';
 import 'leaflet/dist/images/marker-shadow.png';
 import 'leaflet/dist/leaflet';
 
+import { Renderer, parse } from 'marked';
+
 import map_data from '../public/map_data.json'
 import mapUrl from '../public/shipfall.png'
 
