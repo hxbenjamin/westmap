@@ -51,6 +51,37 @@
       "type": "town",
       "label": "Harken",
       "loc": [9, -12]
+    },
+    {
+      "type": "town",
+      "label": "Ogremouth",
+      "loc": [21, 2]
+    },
+    {
+      "type": "town",
+      "label": "Honeyhill",
+      "loc": [28, -32]
+    },
+    {
+      "type": "town",
+      "label": "Thundertree",
+      "loc": [5, -7]
+    },
+    {
+      "type": "poi",
+      "loc": [35, -26]
+    },
+    {
+      "type": "poi",
+      "loc": [14, -2]
+    },
+    {
+      "type": "poi",
+      "loc": [-4, 8]
+    },
+    {
+      "type": "poi",
+      "loc": [22, -7]
     }
   ]
 }
