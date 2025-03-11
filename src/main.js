@@ -6,7 +6,7 @@ import 'leaflet/dist/images/marker-shadow.png';
 import 'leaflet/dist/leaflet';
 
 import map_data from '../public/map_data.json'
-import mapUrl from '../public/shipfall2.png'
+import mapUrl from '../public/shipfall.png'
 
 import * as west_map from './west_map.js'
 

@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "mapWidth": 4725,
-    "mapHeight": 3333,
-    "originHex": [24, 11],
+    "mapWidth": 4500,
+    "mapHeight": 3299,
+    "originHex": [22, 11],
     "hexRadius": 50,
-    "originOffset": [0, -2]
+    "originOffset": [0, 0]
   },
   "features": [
     {
@@ -16,6 +16,41 @@
       "type": "town",
       "label": "Rhubarb",
       "loc": [12, -7]
+    },
+    {
+      "type": "town",
+      "label": "Stonepoint",
+      "loc": [18, -7]
+    },
+    {
+      "type": "town",
+      "label": "Welton",
+      "loc": [19, -12]
+    },
+    {
+      "type": "town",
+      "label": "Seaguard",
+      "loc": [20, -18]
+    },
+    {
+      "type": "town",
+      "label": "Raven",
+      "loc": [21, -4]
+    },
+    {
+      "type": "town",
+      "label": "Halfway",
+      "loc": [27, -19]
+    },
+    {
+      "type": "town",
+      "label": "Trewick",
+      "loc": [28, -24]
+    }, 
+    {
+      "type": "town",
+      "label": "Harken",
+      "loc": [9, -12]
     }
   ]
 }

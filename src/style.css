@@ -21,8 +21,27 @@
 
 .wm-position-control {
   color: black;
+  background-color: grey;
 }
 
 .wm-position-control > span {
   padding: 4px;
+}
+
+.wm-town-marker-img {
+  width: 32px;
+  height: 32px;
+}
+
+.wm-town-marker-label {
+  font-size: 16px;
+  font-family: Garamond, serif;
+  color: black;
+  text-shadow: 1px 1px 2px white;
+}
+
+.wm-town-marker-container {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
 }

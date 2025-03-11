@@ -16,7 +16,6 @@ L.PositionControl = L.Control.extend({
     onAdd: function (map) {
         var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control wm-position-control');
         this._positionLabel = L.DomUtil.create('span', '', container);
-        // this._positionLabel.innerHTML = "Hello, World!";
         L.DomEvent.disableClickPropagation(this._positionLabel);
         container.title = "Position";
         return container;
@@ -27,6 +26,28 @@ L.PositionControl = L.Control.extend({
     }
 });
 
+let PoiIcon = L.Icon.extend({
+    options: {
+        shadowUrl: 'leaf-shadow.png',
+        iconSize:     [38, 95],
+        iconAnchor:   [22, 94]
+    }
+});
+
+
+let generateTownMarker = function( latlng, label, imgUrl ) {
+    window.console.log(latlng, label);
+    return new L.Marker(latlng, {
+        icon: new L.DivIcon({
+            iconSize: [32, 32],
+            className: 'wm-town-marker',
+            html: '<div class="wm-town-marker-container">' +
+                    `<img class="wm-town-marker-img" src="${imgUrl}"/>` +
+                    `<span class="wm-town-marker-label">${label}</span>` + 
+                  '</div>'
+        })
+    })
+}
 
 export class WestMap {
 
@@ -39,15 +60,20 @@ export class WestMap {
         this._mapData = mapData;
         this._hexagonRadius = this._mapData.metadata.hexRadius; 
         this._originOffset = this._mapData.metadata.originOffset;
+        this._originHex = this._mapData.metadata.originHex;
+
+        let bounds = [[0,0], [this._mapData.metadata.mapHeight, this._mapData.metadata.mapWidth]];
 
         this._map = L.map('westmap-map', {
             crs: L.CRS.Simple,
             minZoom: -2,
             maxZoom: 1,
+            maxBounds: bounds,
+            maxBoundsViscosity: 0.5
         });
 
 
-        let bounds = [[0,0], [this._mapData.metadata.mapHeight, this._mapData.metadata.mapWidth]];
+        
         let image = L.imageOverlay(mapUrl, bounds, {
             interactive: true
         }).addTo(this._map);
@@ -57,6 +83,14 @@ export class WestMap {
         this._map.setView( [this._mapData.metadata.mapHeight / 2, this._mapData.metadata.mapWidth / 2], -2 )
 
         this._positionControl = new L.PositionControl().addTo(this._map);
+
+        this._addTownLabels();
+
+       
+    }
+
+    localHexToPixel( axial_coords ) {
+        return hex_utils.axial_to_pixel( math_utils.vector_add(axial_coords, this._originHex), this._hexagonRadius, this._originOffset);
     }
 
     _onImageLayerMouseMove( e ) {
@@ -77,5 +111,14 @@ export class WestMap {
             let origin_offset_hex = math_utils.vector_subtract( hex_coord, this._mapData.metadata.originHex )
             this._positionControl.setText( `[${origin_offset_hex[0]}, ${origin_offset_hex[1]}]` );
         }
+    }
+
+    _addTownLabels( ) {
+        this._mapData.features.forEach(element => {
+            if ( element.type == "town" ) {
+                let latlng = leaflet_utils.pixel_to_latlng(this.localHexToPixel(element.loc));
+                generateTownMarker(latlng, element.label, "/icon_town.png").addTo(this._map);
+            }
+        });
     }
 }
