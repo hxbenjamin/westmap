@@ -6,7 +6,7 @@ import * as hex_utils from "./hex_utils.js"
 import * as leaflet_utils from './leaflet_utils.js'
 import * as math_utils from './math_utils.js'
 
-import iconMarkerUrl from '../static/icon_marker.png'
+import iconMarkerUrl from '../static/crosshair.svg'
 
 L.PositionControl = L.Control.extend({
 
@@ -27,12 +27,18 @@ L.PositionControl = L.Control.extend({
     }
 });
 
-let PoiIcon = new L.Icon({
+const PoiIcon = new L.Icon({
     iconUrl: iconMarkerUrl,
     interactive: false,
-    iconSize:     [32, 32],
+    iconSize: [32, 32],
+    className: "wm-poi-icon"
 });
 
+const PoiIconSmall = new L.Icon({
+    iconUrl: iconMarkerUrl,
+    interactive: false,
+    iconSize: [20, 20],
+});
 
 let generateTownMarker = function( latlng, label, imgUrl ) {
     return new L.Marker(latlng, {
@@ -73,11 +79,11 @@ export class WestMapInfoPane {
 
     setContent( markdown_text ) {
         let debug = marked.parse( markdown_text );
-        this._getContentElem.innerHTML = debug;
+        this._getContentElem().innerHTML = debug;
     }
 
     clearContent() {
-        this._getContentElem.innerHTML = "";
+        this._getContentElem().innerHTML = "";
     }
 }
 
@@ -89,9 +95,10 @@ export class WestMap {
 
         this._lastHoveredHex = null; 
         this._lastSelectedHex = null; 
-
         this._selectedOverlay = null; 
         this._hexagonOverlay = null; 
+        this._poiMarkers = [];
+
 
         this._mapData = mapData;
         this._infoPanel = infoPanel;
@@ -118,17 +125,18 @@ export class WestMap {
 
         image.on('mousemove', function(e) { that._onImageLayerMouseMove(e); });
         image.on('click', function(e) { 
-            window.console.log("HELLO");
             that._onImageLayerClick(e); 
         });
 
-        this._map.setView( [this._mapData.metadata.mapHeight / 2, this._mapData.metadata.mapWidth / 2], -2 )
+        this._map.on( "zoomend", e => that._onZoomEnd(e) ); 
 
         this._positionControl = new L.PositionControl().addTo(this._map);
 
         this._addTownLabels();
         this._addPoiMarkers();
-       
+
+
+        this._map.setView( [this._mapData.metadata.mapHeight / 2, this._mapData.metadata.mapWidth / 2], -2 )       
     }
 
     localHexToPixel( axial_coords ) {
@@ -149,6 +157,24 @@ export class WestMap {
         }).addTo(this._map);
     }
 
+    _getMapElem() {
+        return document.getElementById("westmap-map");
+    }
+
+    _onZoomEnd( e ) {
+        const currentZoom = this._map.getZoom();
+        // const mapElem = this._getMapElem();
+
+        if ( currentZoom === this._map.getMinZoom() ) {
+            this._poiMarkers.forEach( m => m.setIcon(PoiIconSmall) );
+            // mapElem.classList.add( "wm-map-minzoom" );
+        }
+        else {
+            // mapElem.classList.remove( "wm-map-minzoom" );
+            this._poiMarkers.forEach( m => m.setIcon(PoiIcon) );
+        }
+    }
+
     unselectTile( ) {
         if ( this._lastSelectedHex ) {
             this._lastSelectedHex = null; 
@@ -160,6 +186,7 @@ export class WestMap {
         }
 
         this._infoPanel.clearTitle();
+        this._infoPanel.clearContent();
     }
 
     selectTile( localHex ) {
@@ -171,6 +198,11 @@ export class WestMap {
         this._mapData.features.some( f => {
             if ( math_utils.vector_equals( f.loc, localHex ) ) {
                 that._infoPanel.setTitle( f.label );
+
+                if ( f.desc ) {
+                    that._infoPanel.setContent(f.desc);
+                }
+
                 return true;
             }
         });
@@ -230,10 +262,12 @@ export class WestMap {
         this._mapData.features.forEach(element => {
             if ( element.type == "poi" ) {
                 let latlng = leaflet_utils.pixel_to_latlng(this.localHexToPixel(element.loc));
-                L.marker(latlng, {
+                let newMarker = L.marker(latlng, {
                     icon: PoiIcon,
                     interactive: false
                 }).addTo(this._map);
+                
+                this._poiMarkers.push(newMarker);
             }
         });
     }

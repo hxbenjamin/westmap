@@ -70,22 +70,28 @@
     {
       "type": "poi",
       "loc": [35, -26],
-      "label": "Fey Caves"
+      "label": "Fey Caves",
+      "desc": "* Entrance to a big fey cave.\n* Requires you to walk backwards through doors to escape"
     },
     {
       "type": "poi",
       "loc": [14, -2],
-      "label": "Owlbear Island"
+      "label": "Owlbear Island",
+      "desc": "* Island full of owlbears\n* Island also surrounded by firefly antimagic field"
+      
     },
     {
       "type": "poi",
       "loc": [-4, 8],
-      "label": "Crab Island"
+      "label": "Crab Island",
+      "desc": "* Island contains big crabs"
     },
     {
       "type": "poi",
       "loc": [22, -7],
-      "label": "Zappy Shrine"
+      "label": "Zappy Shrine",
+      "desc": "* Big shrine surrounded by magic\n* Does huge elemental weather damage if you touch it\n* Seems to want human blood (??)"
+
     }
   ]
 }
