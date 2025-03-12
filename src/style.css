@@ -1,5 +1,5 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Garamond, serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -37,6 +37,11 @@ body, html {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin: 1em;
+}
+
+#wm-panel-title {
+  font-size: 24px;
 }
 
 

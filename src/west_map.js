@@ -1,5 +1,6 @@
 
 import 'leaflet/dist/leaflet';
+import * as marked from 'marked';
 
 import * as hex_utils from "./hex_utils.js"
 import * as leaflet_utils from './leaflet_utils.js'
@@ -28,6 +29,7 @@ L.PositionControl = L.Control.extend({
 
 let PoiIcon = new L.Icon({
     iconUrl: iconMarkerUrl,
+    interactive: false,
     iconSize:     [32, 32],
 });
 
@@ -47,9 +49,42 @@ let generateTownMarker = function( latlng, label, imgUrl ) {
     })
 }
 
+export class WestMapInfoPane {
+    constructor( rootElem ) {
+        const that = this;
+        this._rootElem = rootElem;
+    }
+
+    _getTitleElem() {
+        return this._rootElem.querySelector("#wm-panel-title span");
+    }
+
+    setTitle( title ) {
+        this._getTitleElem().innerHTML = title;
+    }
+
+    clearTitle() {
+        this._getTitleElem().innerHTML = "";
+    }
+
+    _getContentElem() {
+        return document.getElementById("wm-panel-content");
+    }
+
+    setContent( markdown_text ) {
+        let debug = marked.parse( markdown_text );
+        this._getContentElem.innerHTML = debug;
+    }
+
+    clearContent() {
+        this._getContentElem.innerHTML = "";
+    }
+}
+
+
 export class WestMap {
 
-    constructor( mapData, mapUrl ) {
+    constructor( mapData, mapUrl, infoPanel ) {
         const that = this; 
 
         this._lastHoveredHex = null; 
@@ -59,6 +94,7 @@ export class WestMap {
         this._hexagonOverlay = null; 
 
         this._mapData = mapData;
+        this._infoPanel = infoPanel;
         this._hexagonRadius = this._mapData.metadata.hexRadius; 
         this._originOffset = this._mapData.metadata.originOffset;
         this._originHex = this._mapData.metadata.originHex;
@@ -70,7 +106,8 @@ export class WestMap {
             minZoom: -2,
             maxZoom: 1,
             maxBounds: bounds,
-            maxBoundsViscosity: 0.5
+            maxBoundsViscosity: 0.5,
+            attributionControl: false
         });
 
 
@@ -104,10 +141,10 @@ export class WestMap {
         return math_utils.vector_subtract( hex_coord, this._mapData.metadata.originHex );
     }
 
-    _addHexOverlay( localHex ) {
+    _addHexOverlay( localHex, colour ) {
         const new_coords = hex_utils.hexagon_coords_pixel(this.localHexToPixel(localHex), this._hexagonRadius);
         return L.polygon(new_coords, {
-            color: 'black',
+            color: colour,
             interactive: false
         }).addTo(this._map);
     }
@@ -121,25 +158,36 @@ export class WestMap {
             this._selectedOverlay.remove();
             this._selectedOverlay = null; 
         }
+
+        this._infoPanel.clearTitle();
     }
 
     selectTile( localHex ) {
         this._lastSelectedHex = localHex;
-        this._selectedOverlay = this._addHexOverlay(localHex);
+        this._selectedOverlay = this._addHexOverlay(localHex, "black");
+
+        // TODO: replace with map lookup 
+        const that = this;
+        this._mapData.features.some( f => {
+            if ( math_utils.vector_equals( f.loc, localHex ) ) {
+                that._infoPanel.setTitle( f.label );
+                return true;
+            }
+        });
     }
 
     _onImageLayerMouseMove( e ) {
 
         const localHex = this.localLatLngToHex(e.latlng);
-
-        if ( localHex !== this._lastHoveredHex ) {
-            if ( this._lastHoveredHex && this._hexagonOverlay ) {
+        
+        if ( !this._lastHoveredHex || !math_utils.vector_equals(localHex, this._lastHoveredHex) ) {
+            if ( this._hexagonOverlay ) {
                 this._hexagonOverlay.remove();
             }
 
             this._lastHoveredHex = localHex;
             const new_coords = hex_utils.hexagon_coords_pixel(this.localHexToPixel(localHex), this._hexagonRadius);
-            this._hexagonOverlay = this._addHexOverlay(localHex);
+            this._hexagonOverlay = this._addHexOverlay(localHex, );
 
             this._positionControl.setText( `[${localHex[0]}, ${localHex[1]}]` );
         }
@@ -149,7 +197,7 @@ export class WestMap {
         const localHex = this.localLatLngToHex(e.latlng);
 
         if ( this._lastSelectedHex ) {
-            if ( this._lastSelectedHex === localHex ) {
+            if ( math_utils.vector_equals(this._lastSelectedHex, localHex )) {
 
                 // We are toggling the already selected tile - deselect. 
                 this.unselectTile();
@@ -182,8 +230,10 @@ export class WestMap {
         this._mapData.features.forEach(element => {
             if ( element.type == "poi" ) {
                 let latlng = leaflet_utils.pixel_to_latlng(this.localHexToPixel(element.loc));
-                L.marker(latlng, {icon: PoiIcon}).addTo(this._map);
-                // generateTownMarker(latlng, element.label, "/icon_town.png").addTo(this._map);
+                L.marker(latlng, {
+                    icon: PoiIcon,
+                    interactive: false
+                }).addTo(this._map);
             }
         });
     }

@@ -69,19 +69,23 @@
     },
     {
       "type": "poi",
-      "loc": [35, -26]
+      "loc": [35, -26],
+      "label": "Fey Caves"
     },
     {
       "type": "poi",
-      "loc": [14, -2]
+      "loc": [14, -2],
+      "label": "Owlbear Island"
     },
     {
       "type": "poi",
-      "loc": [-4, 8]
+      "loc": [-4, 8],
+      "label": "Crab Island"
     },
     {
       "type": "poi",
-      "loc": [22, -7]
+      "loc": [22, -7],
+      "label": "Zappy Shrine"
     }
   ]
 }
