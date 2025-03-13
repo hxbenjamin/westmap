@@ -69,15 +69,22 @@
     },
     {
       "type": "poi",
-      "loc": [35, -26],
-      "label": "Fey Caves",
-      "desc": "* Entrance to a big fey cave.\n* Requires you to walk backwards through doors to escape"
+      "loc": [34, -26],
+      "label": "Treewick Traps",
+      "desc": "* A large and only partially explored cave system\n* Contains, at the least, purple worms and rust monsters"
     },
     {
       "type": "poi",
       "loc": [14, -2],
       "label": "Owlbear Island",
       "desc": "* Island full of owlbears\n* Island also surrounded by firefly antimagic field"
+      
+    },
+    {
+      "type": "poi",
+      "loc": [34, -25],
+      "label": "Hag Hut",
+      "desc": "* A non-hostile hag who is willing to trade"
       
     },
     {

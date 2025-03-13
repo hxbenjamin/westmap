@@ -8,6 +8,7 @@ import * as math_utils from './math_utils.js'
 
 import iconMarkerUrl from '../static/crosshair.svg'
 
+// Control which shows the current selected tile in the bottom left 
 L.PositionControl = L.Control.extend({
 
     options: {
@@ -27,6 +28,7 @@ L.PositionControl = L.Control.extend({
     }
 });
 
+// Generic 'point of interest' icon. 
 const PoiIcon = new L.Icon({
     iconUrl: iconMarkerUrl,
     interactive: false,
@@ -34,27 +36,15 @@ const PoiIcon = new L.Icon({
     className: "wm-poi-icon"
 });
 
+// Generic POI icon but slightly smaller for max zoom. 
 const PoiIconSmall = new L.Icon({
     iconUrl: iconMarkerUrl,
     interactive: false,
     iconSize: [20, 20],
 });
 
-let generateTownMarker = function( latlng, label, imgUrl ) {
-    return new L.Marker(latlng, {
-        interactive: false,
-        icon: new L.DivIcon({
-            interactive: false,
-            iconSize: [32, 32],
-            className: 'wm-town-marker',
-            html: '<div class="wm-town-marker-container">' +
-                    `<img class="wm-town-marker-img" src="${imgUrl}"/>` +
-                    `<span class="wm-town-marker-label">${label}</span>` + 
-                  '</div>'
-        })
-    })
-}
 
+// Class representing the 'information' pane. 
 export class WestMapInfoPane {
     constructor( rootElem ) {
         const that = this;
@@ -249,11 +239,26 @@ export class WestMap {
         
     }
 
+    _generateTownMarker ( latlng, label, imgUrl ) {
+        return new L.Marker(latlng, {
+            interactive: false,
+            icon: new L.DivIcon({
+                interactive: false,
+                iconSize: [32, 32],
+                className: 'wm-town-marker',
+                html: '<div class="wm-town-marker-container">' +
+                        `<img class="wm-town-marker-img" src="${imgUrl}"/>` +
+                        `<span class="wm-town-marker-label">${label}</span>` + 
+                      '</div>'
+            })
+        })
+    }
+
     _addTownLabels( ) {
         this._mapData.features.forEach(element => {
             if ( element.type == "town" ) {
                 let latlng = leaflet_utils.pixel_to_latlng(this.localHexToPixel(element.loc));
-                generateTownMarker(latlng, element.label, "/icon_town.png").addTo(this._map);
+                this._generateTownMarker(latlng, element.label, "/icon_town.png").addTo(this._map);
             }
         });
     }
