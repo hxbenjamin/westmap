@@ -1,18 +1,11 @@
+/* style.css */
+
+
+/* Global styles */
+
 :root {
   font-family: Garamond, serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  background-color: black;
+  background-color: #FCF5E5;
 }
 
 body, html {
@@ -32,13 +25,17 @@ body, html {
   background-color: black;
 }
 
+
+
+/* Information panel styles */
+
 #westmap-panel {
   width: 20%;
   display: flex;
   flex-direction: column;
   align-items: center;
   margin: 1em;
-  border: 2px solid white;
+  border: 2px solid black;
   border-radius: 5px;
 }
 
@@ -53,6 +50,9 @@ body, html {
 }
 
 
+
+/* Position control styles */
+
 .wm-position-control {
   color: black;
   background-color: grey;
@@ -61,6 +61,10 @@ body, html {
 .wm-position-control > span {
   padding: 4px;
 }
+
+
+
+/* Marker styles */
 
 .wm-town-marker {
   pointer-events: none;
