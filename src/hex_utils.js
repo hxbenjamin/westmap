@@ -1,19 +1,20 @@
+// hex_utils.js 
 
 import * as math_utils from './math_utils.js';
 
 const sin60 = Math.sqrt(3) / 2;
 
+// Coordinates of the flat top unit hexagon 
 const unit_hexagon_coords = [
-    [0,           1 ],
-    [sin60,       0.5 ],
-    [sin60,       -0.5 ],
-    [0,           -1 ],
-    [-sin60,      -0.5 ],
-    [ -sin60,     0.5 ],
+    [0, 1],
+    [sin60, 0.5],
+    [sin60, -0.5],
+    [0, -1],
+    [-sin60, -0.5],
+    [ -sin60, 0.5],
 ]
 
-
-
+// Convert from cubic hexagonal coordinates to axial coordinates 
 export function cube_to_axial(cube_coords) {
     const q = cube_coords[0];
     const r = cube_coords[1];
@@ -21,6 +22,7 @@ export function cube_to_axial(cube_coords) {
     return [q, r]
 }
 
+// Convert from axial hexagonal coordinates to cubic coordinates 
 export function axial_to_cube(axial_coords) {
     const q = axial_coords[0];
     const r = axial_coords[1];
@@ -28,6 +30,7 @@ export function axial_to_cube(axial_coords) {
     return [q, r, -q -r]
 }
 
+// Accept fractional cubic coordinates, and round to the nearest whole coordinate. 
 export function round_from_cube(frac_cube) {
     const frac_q = frac_cube[0];
     const frac_r = frac_cube[1];
@@ -55,10 +58,12 @@ export function round_from_cube(frac_cube) {
     return [q, r, s]
 }
 
+// Accept fractional axial coordinates, and round to the nearest whole coordinate. 
 export function round_from_axial(frac_axial) {
     return cube_to_axial( round_from_cube( axial_to_cube( frac_axial ) ) );
 }
 
+// Convert from an xy pixel coordine to an axial hex coordinate 
 export function pixel_to_axial(pixel_coords, radius) {
     const x = pixel_coords[0]
     const y = pixel_coords[1]
@@ -69,6 +74,7 @@ export function pixel_to_axial(pixel_coords, radius) {
     return round_from_axial([q,r]);
 }
 
+// Convert from an axial hex coordinate to the xy pixel coordinate at the center of the hex 
 export function axial_to_pixel( axial_coords, scale, origin_offset ) {
     const q = axial_coords[0];
     const r = axial_coords[1];

@@ -1,3 +1,4 @@
+// west_map.js
 
 import 'leaflet/dist/leaflet';
 import * as marked from 'marked';
@@ -77,25 +78,32 @@ export class WestMapInfoPane {
     }
 }
 
-
+// Class representing the map element. 
 export class WestMap {
 
     constructor( mapData, mapUrl, infoPanel ) {
         const that = this; 
 
+        // Coordinates of the current selected and hovered hexes 
         this._lastHoveredHex = null; 
         this._lastSelectedHex = null; 
+        
+        // Overlay elements of the current tile hover and tile selection 
         this._selectedOverlay = null; 
         this._hexagonOverlay = null; 
+        
+        // The current point-of-interest 
         this._poiMarkers = [];
-
 
         this._mapData = mapData;
         this._infoPanel = infoPanel;
+
+        // Helper accessors into the mapData object 
         this._hexagonRadius = this._mapData.metadata.hexRadius; 
         this._originOffset = this._mapData.metadata.originOffset;
         this._originHex = this._mapData.metadata.originHex;
 
+        // Set the bounds of the map equal to the pixel size of the supplied image 
         let bounds = [[0,0], [this._mapData.metadata.mapHeight, this._mapData.metadata.mapWidth]];
 
         this._map = L.map('westmap-map', {
@@ -107,38 +115,41 @@ export class WestMap {
             attributionControl: false
         });
 
-
-        
         let image = L.imageOverlay(mapUrl, bounds, {
             interactive: true
         }).addTo(this._map);
 
-        image.on('mousemove', function(e) { that._onImageLayerMouseMove(e); });
-        image.on('click', function(e) { 
-            that._onImageLayerClick(e); 
-        });
 
+        // Wire up event handlers 
+        image.on('mousemove', function(e) { that._onImageLayerMouseMove(e); });
+        image.on('click', function(e) { that._onImageLayerClick(e); });
         this._map.on( "zoomend", e => that._onZoomEnd(e) ); 
 
+
+        // Finish constructing the map and info objects 
         this._positionControl = new L.PositionControl().addTo(this._map);
 
         this._addTownLabels();
         this._addPoiMarkers();
 
 
+        // Center the view on the center of the map by default 
         this._map.setView( [this._mapData.metadata.mapHeight / 2, this._mapData.metadata.mapWidth / 2], -2 )       
     }
 
+    // Accept an axial coordinate relative to the custom hex origin, and retun the xy pixel coordinate of its center
     localHexToPixel( axial_coords ) {
         return hex_utils.axial_to_pixel( math_utils.vector_add(axial_coords, this._originHex), this._hexagonRadius, this._originOffset);
     }
 
+    // Accept a leaflet lat-long coordinate, convert it to a local-origin relative hex coordinate 
     localLatLngToHex( latlng ) {
         const pixel_coords = leaflet_utils.latlng_to_pixel([latlng.lat, latlng.lng]);
         const hex_coord = hex_utils.pixel_to_axial(pixel_coords, this._hexagonRadius);
         return math_utils.vector_subtract( hex_coord, this._mapData.metadata.originHex );
     }
 
+    // Create and return a hexagonal overlay at the given axial coordinate 
     _addHexOverlay( localHex, colour ) {
         const new_coords = hex_utils.hexagon_coords_pixel(this.localHexToPixel(localHex), this._hexagonRadius);
         return L.polygon(new_coords, {
@@ -147,24 +158,25 @@ export class WestMap {
         }).addTo(this._map);
     }
 
+    // Return the HTML element of our map container 
     _getMapElem() {
         return document.getElementById("westmap-map");
     }
 
     _onZoomEnd( e ) {
         const currentZoom = this._map.getZoom();
-        // const mapElem = this._getMapElem();
 
+        // Toggle between the big and small POI markers on zoom change so that they don't end 
+        // up too big compared to the min-zoom map hexes 
         if ( currentZoom === this._map.getMinZoom() ) {
             this._poiMarkers.forEach( m => m.setIcon(PoiIconSmall) );
-            // mapElem.classList.add( "wm-map-minzoom" );
         }
         else {
-            // mapElem.classList.remove( "wm-map-minzoom" );
             this._poiMarkers.forEach( m => m.setIcon(PoiIcon) );
         }
     }
 
+    // Unselect the currently selected tile. 
     unselectTile( ) {
         if ( this._lastSelectedHex ) {
             this._lastSelectedHex = null; 
@@ -179,6 +191,7 @@ export class WestMap {
         this._infoPanel.clearContent();
     }
 
+    // Select the supplied tile, adding an overlay and updating the information pane 
     selectTile( localHex ) {
         this._lastSelectedHex = localHex;
         this._selectedOverlay = this._addHexOverlay(localHex, "black");
