@@ -5,7 +5,10 @@
 
 :root {
   font-family: Garamond, serif;
-  background-color: #FCF5E5;
+
+  --wm-background-colour: #FCF5E5;
+
+  background-color: var(--wm-background-colour);
 }
 
 body, html {
@@ -20,33 +23,70 @@ body, html {
   height: 100%;
 }
 
+@media (orientation: landscape) {
+  #wm-container {
+    flex-direction: row;
+  }
+
+  #westmap-map {
+    width: 80%;
+  }
+
+  #westmap-panel {
+    width: 20%;
+  }
+}
+
+@media (orientation: portrait) {
+  #wm-container {
+    flex-direction: column;
+  }
+
+  #westmap-map {
+    height: 70%;
+  }
+
+  #westmap-panel {
+    height: 30%;
+  }
+}
+
 #westmap-map {
-  width: 80%;
   background-color: black;
 }
 
 
-
-/* Information panel styles */
-
 #westmap-panel {
-  width: 20%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 1em;
+  margin: 0.6em;
   border: 2px solid black;
-  border-radius: 5px;
+  border-radius: 4px;
 }
+
+
+/* Information panel styles */
 
 #wm-panel-content {
   width: 100%;
   height: 100%;
-  margin: 5px;
+  font-size: calc(0.5em + 1vmax);
+
+  overflow-y: scroll;
+}
+
+#wm-panel-content ul {
+  margin: 0;
+  padding-left: 1.5em;
+  padding-right: 1.5em;
 }
 
 #wm-panel-title {
-  font-size: 24px;
+  font-weight: bold;
+  font-size: calc(0.5em + 2vmax);
+  text-align: center;
 }
 
 
@@ -55,7 +95,7 @@ body, html {
 
 .wm-position-control {
   color: black;
-  background-color: grey;
+  background-color: var(--wm-background-colour);
 }
 
 .wm-position-control > span {
