@@ -7,7 +7,8 @@ import * as hex_utils from "./hex_utils.js"
 import * as leaflet_utils from './leaflet_utils.js'
 import * as math_utils from './math_utils.js'
 
-import iconMarkerUrl from '../static/crosshair.svg'
+import iconPoiNormalUrl from '../static/crosshair.svg'
+import iconPoiQuestionUrl from '../static/crosshair_question.svg'
 
 // Control which shows the current selected tile in the bottom left 
 L.PositionControl = L.Control.extend({
@@ -27,21 +28,6 @@ L.PositionControl = L.Control.extend({
     setText: function (text) {
         this._positionLabel.innerHTML = text;
     }
-});
-
-// Generic 'point of interest' icon. 
-const PoiIcon = new L.Icon({
-    iconUrl: iconMarkerUrl,
-    interactive: false,
-    iconSize: [32, 32],
-    className: "wm-poi-icon"
-});
-
-// Generic POI icon but slightly smaller for max zoom. 
-const PoiIconSmall = new L.Icon({
-    iconUrl: iconMarkerUrl,
-    interactive: false,
-    iconSize: [20, 20],
 });
 
 
@@ -81,7 +67,7 @@ export class WestMapInfoPane {
 export class WestMap {
 
     constructor( mapData, mapUrl, infoPanel ) {
-        const that = this; 
+        const that = this;
 
         // Coordinates of the current selected and hovered hexes 
         this._lastHoveredHex = null; 
@@ -93,6 +79,7 @@ export class WestMap {
         
         // The current point-of-interest 
         this._poiMarkers = [];
+        this._iconObjs = {};
 
         this._mapData = mapData;
         this._infoPanel = infoPanel;
@@ -101,6 +88,9 @@ export class WestMap {
         this._hexagonRadius = this._mapData.metadata.hexRadius; 
         this._originOffset = this._mapData.metadata.originOffset;
         this._originHex = this._mapData.metadata.originHex;
+
+        // Create our icon objects
+        this._generateIcons();
 
         // Set the bounds of the map equal to the pixel size of the supplied image 
         let bounds = [[0,0], [this._mapData.metadata.mapHeight, this._mapData.metadata.mapWidth]];
@@ -163,16 +153,22 @@ export class WestMap {
     }
 
     _onZoomEnd( e ) {
+        const that = this;
         const currentZoom = this._map.getZoom();
+        const isMinZoom = currentZoom === this._map.getMinZoom();
 
         // Toggle between the big and small POI markers on zoom change so that they don't end 
-        // up too big compared to the min-zoom map hexes 
-        if ( currentZoom === this._map.getMinZoom() ) {
-            this._poiMarkers.forEach( m => m.setIcon(PoiIconSmall) );
-        }
-        else {
-            this._poiMarkers.forEach( m => m.setIcon(PoiIcon) );
-        }
+        // up too big compared to the min-zoom map hexes
+
+        this._poiMarkers.forEach( m => {
+
+            let svgName = m.svgName;
+            if ( isMinZoom ) {
+                svgName = svgName + "-small";
+            }
+
+            m.marker.setIcon(that._iconObjs[svgName]);
+        });
     }
 
     // Unselect the currently selected tile. 
@@ -247,8 +243,36 @@ export class WestMap {
             // We didn't already have a tile selected. Select this tile. 
             this.selectTile( localHex );
         }
+    }
 
-        
+    _generateIcons() {
+
+        this._iconObjs["poi-icon-normal"] = new L.Icon({
+            iconUrl: iconPoiNormalUrl,
+            interactive: false,
+            iconSize: [32, 32],
+            className: "wm-poi-icon"
+        });
+
+        this._iconObjs["poi-icon-normal-small"] = new L.Icon({
+            iconUrl: iconPoiNormalUrl,
+            interactive: false,
+            iconSize: [20, 20],
+        });
+
+        this._iconObjs["poi-icon-question"] = new L.Icon({
+            iconUrl: iconPoiQuestionUrl,
+            interactive: false,
+            iconSize: [32, 32],
+            className: "wm-poi-icon"
+        });
+
+        this._iconObjs["poi-icon-question-small"] = new L.Icon({
+            iconUrl: iconPoiQuestionUrl,
+            interactive: false,
+            iconSize: [20, 20],
+        });
+
     }
 
     _generateTownMarker ( latlng, label, imgUrl ) {
@@ -276,15 +300,28 @@ export class WestMap {
     }
 
     _addPoiMarkers( ) {
+        let that = this;
         this._mapData.features.forEach(element => {
             if ( element.type === "poi" ) {
+
+                let markerData = {};
+
+                // Get the right SVG icon - give markers tagged 'approx' a little question mark
+                if ( element.approx ) {
+                    markerData.svgName = "poi-icon-question";
+                }
+                else {
+                    markerData.svgName = "poi-icon-normal";
+                }
+
                 let latlng = leaflet_utils.pixel_to_latlng(this.localHexToPixel(element.loc));
-                let newMarker = L.marker(latlng, {
-                    icon: PoiIcon,
+
+                markerData.marker = L.marker(latlng, {
+                    icon: that._iconObjs[markerData.svgName],
                     interactive: false
                 }).addTo(this._map);
-                
-                this._poiMarkers.push(newMarker);
+
+                this._poiMarkers.push(markerData);
             }
         });
     }

@@ -161,7 +161,7 @@
     },
     {
       "type": "poi",
-      "loc": [27, -7],
+      "loc": [27, -9],
       "label": "Safehouse",
       "desc": "",
       "approx": true
