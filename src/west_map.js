@@ -69,8 +69,7 @@ export class WestMapInfoPane {
     }
 
     setContent( markdown_text ) {
-        let debug = marked.parse( markdown_text );
-        this._getContentElem().innerHTML = debug;
+        this._getContentElem().innerHTML = marked.parse(markdown_text);
     }
 
     clearContent() {
@@ -269,7 +268,7 @@ export class WestMap {
 
     _addTownLabels( ) {
         this._mapData.features.forEach(element => {
-            if ( element.type == "town" ) {
+            if ( element.type === "town" ) {
                 let latlng = leaflet_utils.pixel_to_latlng(this.localHexToPixel(element.loc));
                 this._generateTownMarker(latlng, element.label, "/icon_town.png").addTo(this._map);
             }
@@ -278,7 +277,7 @@ export class WestMap {
 
     _addPoiMarkers( ) {
         this._mapData.features.forEach(element => {
-            if ( element.type == "poi" ) {
+            if ( element.type === "poi" ) {
                 let latlng = leaflet_utils.pixel_to_latlng(this.localHexToPixel(element.loc));
                 let newMarker = L.marker(latlng, {
                     icon: PoiIcon,

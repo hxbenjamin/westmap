@@ -78,14 +78,12 @@
       "loc": [14, -2],
       "label": "Owlbear Island",
       "desc": "* Island full of owlbears\n* Island also surrounded by firefly antimagic field"
-      
     },
     {
       "type": "poi",
       "loc": [34, -25],
       "label": "Hag Hut",
       "desc": "* A non-hostile hag who is willing to trade"
-      
     },
     {
       "type": "poi",
@@ -95,10 +93,78 @@
     },
     {
       "type": "poi",
-      "loc": [22, -7],
+      "loc": [23, -8],
       "label": "Zappy Shrine",
       "desc": "* Big shrine surrounded by magic\n* Does huge elemental weather damage if you touch it\n* Seems to want human blood (??)"
-
+    },
+    {
+      "type": "poi",
+      "loc": [13, -11],
+      "label": "Wolf Trading Post",
+      "desc": "* A trading post run by uplifted wolves\n* The wolves accept sheep, books, weapons.\n* In exchange, they can provide info about surrounding hexes"
+    },
+    {
+      "type": "poi",
+      "loc": [17, -11],
+      "label": "Empty Owlbear Den",
+      "desc": ""
+    },
+    {
+      "type": "poi",
+      "loc": [6, -11],
+      "label": "Keep of Drowned Souls",
+      "desc": ""
+    },
+    {
+      "type": "poi",
+      "loc": [24, -15],
+      "label": "Sunken Tower",
+      "desc": ""
+    },
+    {
+      "type": "poi",
+      "loc": [21, -12],
+      "label": "Lady Clayford's Camp",
+      "desc": "* A walled encampment in a forest clearing. Currently populated by hostile dwarves.\n* A large cave below, partially explored."
+    },
+    {
+      "type": "poi",
+      "loc": [7, -5],
+      "label": "Red Needle Tavern",
+      "desc": ""
+    },
+    {
+      "type": "town",
+      "loc": [25, -13],
+      "label": "Borugham",
+      "desc": ""
+    },
+    {
+      "type": "poi",
+      "loc": [24, -6],
+      "label": "Phase Spider Cave",
+      "desc": "* A cave containing phase spiders.\n* Cave contains a +1 STR stat fountain."
+    },
+    {
+      "type": "poi",
+      "loc": [26, -2],
+      "label": "Tower",
+      "desc": "",
+      "approx": true
+    },
+    {
+      "type": "poi",
+      "loc": [27, -5],
+      "label": "Edelader",
+      "desc": "",
+      "approx": true
+    },
+    {
+      "type": "poi",
+      "loc": [27, -7],
+      "label": "Safehouse",
+      "desc": "",
+      "approx": true
     }
   ]
 }
