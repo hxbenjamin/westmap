@@ -4,7 +4,7 @@
     "mapHeight": 3299,
     "originHex": [22, 11],
     "hexRadius": 50,
-    "originOffset": [0, 0]
+    "originOffset": [-1, 0]
   },
   "features": [
     {
@@ -166,5 +166,8 @@
       "desc": "",
       "approx": true
     }
+  ],
+  "exploredHexes": [
+    [13, -8], [14, -9], [22, -5], [23, -6], [22, -6], [23, -7]
   ]
 }

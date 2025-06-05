@@ -20,6 +20,7 @@ L.PositionControl = L.Control.extend({
     onAdd: function (map) {
         var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control wm-position-control');
         this._positionLabel = L.DomUtil.create('span', '', container);
+        this._positionLabel.innerHTML = "[0, 0]";
         L.DomEvent.disableClickPropagation(this._positionLabel);
         container.title = "Position";
         return container;
@@ -92,38 +93,60 @@ export class WestMap {
         // Create our icon objects
         this._generateIcons();
 
-        // Set the bounds of the map equal to the pixel size of the supplied image 
+        // Set the bounds of the map equal to the pixel size of the supplied image, with a little extra to allow
+        // panning slightly outside the map
+        const extraBounds = 100;
         let bounds = [[0,0], [this._mapData.metadata.mapHeight, this._mapData.metadata.mapWidth]];
+        let outerBounds = [
+            [-extraBounds,
+                -extraBounds],
+            [this._mapData.metadata.mapHeight + 2* extraBounds,
+                this._mapData.metadata.mapWidth + 2*extraBounds]
+        ];
 
         this._map = L.map('westmap-map', {
             crs: L.CRS.Simple,
             minZoom: -2,
             maxZoom: 1,
-            maxBounds: bounds,
+            maxBounds: outerBounds,
             maxBoundsViscosity: 0.5,
             attributionControl: false
         });
 
+        // The main backing image - hex map and terrain
         let image = L.imageOverlay(mapUrl, bounds, {
             interactive: true
         }).addTo(this._map);
-
 
         // Wire up event handlers 
         image.on('mousemove', function(e) { that._onImageLayerMouseMove(e); });
         image.on('click', function(e) { that._onImageLayerClick(e); });
         this._map.on( "zoomend", e => that._onZoomEnd(e) ); 
 
+        // Populate the map with info from our map_data json
+        this._addPoiMarkers();
+        this._addExploredTileOverlay()
 
-        // Finish constructing the map and info objects 
+
+        // Create the bottom right 'position' control
         this._positionControl = new L.PositionControl().addTo(this._map);
 
-        this._addTownLabels();
-        this._addPoiMarkers();
+
+        // Create the top-left 'layers' control.
+        let overlayMaps = {
+            "Towns": this._townLayerGroup,
+            "POIs": this._poiLayerGroup,
+            "Explored Tiles": this._exploredTileLayerGroup
+        }
+
+        this._layerControl = L.control.layers(null, overlayMaps, {
+            position: 'topleft',
+            collapsed: false
+        }).addTo(this._map);
 
 
         // Center the view on the center of the map by default 
-        this._map.setView( [this._mapData.metadata.mapHeight / 2, this._mapData.metadata.mapWidth / 2], -2 )       
+        this._map.setView( [this._mapData.metadata.mapHeight / 2, this._mapData.metadata.mapWidth / 2], -2 )
     }
 
     // Accept an axial coordinate relative to the custom hex origin, and retun the xy pixel coordinate of its center
@@ -139,17 +162,17 @@ export class WestMap {
     }
 
     // Create and return a hexagonal overlay at the given axial coordinate 
-    _addHexOverlay( localHex, colour ) {
-        const new_coords = hex_utils.hexagon_coords_pixel(this.localHexToPixel(localHex), this._hexagonRadius);
-        return L.polygon(new_coords, {
-            color: colour,
+    _createHexOverlay(localHex, props ) {
+        const screenspace_coords = hex_utils.hexagon_coords_pixel(this.localHexToPixel(localHex), this._hexagonRadius);
+        return L.polygon(screenspace_coords, Object.assign({
             interactive: false
-        }).addTo(this._map);
+        }, props));
     }
 
-    // Return the HTML element of our map container 
-    _getMapElem() {
-        return document.getElementById("westmap-map");
+    _createHexLayerGroup(hex_tiles, props) {
+        const that = this;
+        let layers = hex_tiles.map( tile => { return that._createHexOverlay(tile, props) });
+        return L.layerGroup(layers, {});
     }
 
     _onZoomEnd( e ) {
@@ -189,7 +212,7 @@ export class WestMap {
     // Select the supplied tile, adding an overlay and updating the information pane 
     selectTile( localHex ) {
         this._lastSelectedHex = localHex;
-        this._selectedOverlay = this._addHexOverlay(localHex, "black");
+        this._selectedOverlay = this._createHexOverlay(localHex, {color:"black"}).addTo(this._map);
 
         // TODO: replace with map lookup 
         const that = this;
@@ -216,8 +239,10 @@ export class WestMap {
             }
 
             this._lastHoveredHex = localHex;
-            const new_coords = hex_utils.hexagon_coords_pixel(this.localHexToPixel(localHex), this._hexagonRadius);
-            this._hexagonOverlay = this._addHexOverlay(localHex, );
+            this._hexagonOverlay = this._createHexOverlay(localHex, {
+                color: "black",
+                stroke: false
+            }).addTo(this._map);
 
             this._positionControl.setText( `[${localHex[0]}, ${localHex[1]}]` );
         }
@@ -275,6 +300,7 @@ export class WestMap {
 
     }
 
+    // Generate a single marker for a 'town'
     _generateTownMarker ( latlng, label, imgUrl ) {
         return new L.Marker(latlng, {
             interactive: false,
@@ -290,19 +316,22 @@ export class WestMap {
         })
     }
 
-    _addTownLabels( ) {
-        this._mapData.features.forEach(element => {
-            if ( element.type === "town" ) {
-                let latlng = leaflet_utils.pixel_to_latlng(this.localHexToPixel(element.loc));
-                this._generateTownMarker(latlng, element.label, "/icon_town.png").addTo(this._map);
-            }
-        });
-    }
-
+    // Create all of our point-of-interest markers
     _addPoiMarkers( ) {
         let that = this;
+
+        let townLayerElems = [];
+        let poiLayerElems = [];
+
         this._mapData.features.forEach(element => {
-            if ( element.type === "poi" ) {
+
+            if ( element.type === "town" ) {
+                let latlng = leaflet_utils.pixel_to_latlng(this.localHexToPixel(element.loc));
+                let marker = this._generateTownMarker(latlng, element.label, "/icon_town.png");
+                townLayerElems.push(marker);
+            }
+
+            else if ( element.type === "poi" ) {
 
                 let markerData = {};
 
@@ -319,10 +348,24 @@ export class WestMap {
                 markerData.marker = L.marker(latlng, {
                     icon: that._iconObjs[markerData.svgName],
                     interactive: false
-                }).addTo(this._map);
+                });
 
+                poiLayerElems.push(markerData.marker);
                 this._poiMarkers.push(markerData);
             }
+        });
+
+
+        this._townLayerGroup = L.layerGroup(townLayerElems).addTo(this._map);
+        this._poiLayerGroup = L.layerGroup(poiLayerElems).addTo(this._map);
+    }
+
+    // Generate our 'explored tile' overlay
+    _addExploredTileOverlay( ) {
+        this._exploredTileLayerGroup = this._createHexLayerGroup( this._mapData.exploredHexes, {
+            color: "red",
+            stroke: false,
+            fillOpacity: 0.6
         });
     }
 }
